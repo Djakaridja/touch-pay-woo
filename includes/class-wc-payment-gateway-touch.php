@@ -29,7 +29,7 @@ class WC_Gateway_Touch extends WC_Payment_Gateway
 
         // Load the settings.
         $this->initFormFields();
-        $this->initSettings();
+        // $this->initSettings();
 
         // Get settings.
         $this->title              = $this->get_option('title');
@@ -255,9 +255,9 @@ class WC_Gateway_Touch extends WC_Payment_Gateway
     private function _loadShippingMethodOptions()
     {
         // Since this is expensive, we only want to do it if we're actually on the settings page.
-        if (! $this->is_accessing_settings()) {
+/*         if (! $this->is_accessing_settings()) {
             return array();
-        }
+        } */
 
         $data_store = WC_Data_Store::load('shipping-zone');
         $raw_zones  = $data_store->get_zones();
@@ -373,7 +373,7 @@ class WC_Gateway_Touch extends WC_Payment_Gateway
         $order = wc_get_order($order_id);
 
         if ($order->get_total() > 0) {
-            $this->_touchPaymentProcessing($order);
+            $this->_touchPaymentProcessing($order_id, $order);
         }
     }
 
@@ -384,37 +384,37 @@ class WC_Gateway_Touch extends WC_Payment_Gateway
      *
      * @return array
      */
-    private function _touchPaymentProcessing($order)
+    private function _touchPaymentProcessing($order_id, $order)
     {
 
         $total = intval($order->get_total());
         var_dump($total);
 
-        /* $phone = esc_attr( $_POST['payment_number'] );
-        $order_id = $this->$order_id;
+        $phone = esc_attr( $_POST['payment_number'] );
 
         if(substr($phone, 0, 2)== '66' || substr($phone, 0, 5)== '22466'){
-            $service_code = $service_code_mm;
+            $service_code = $this->service_code_mm;
             return $service_code;
 
         }elseif (substr($phone, 0, 2)== '62' || substr($phone, 0, 5)== '22462') {
-            $service_code = $service_code_om;
-            return $service_code; */
-    }
+            $service_code = $this->service_code_om;
+			return $service_code;
+			}
 
 
-    /*  $url = 'https://dev-api.gutouch.com/dist/api/touchpayapi/v1/' . $partner_id . '/transaction?loginAgent=' . $login_agent.'&passwordAgent=' . $password_agent;
-        var_dump($url); */
 
-        /* $body = array(
-            'idFromClient'   =>$this->$order_id,
+			 $url = 'https://dev-api.gutouch.com/dist/api/touchpayapi/v1/' . $partner_id . '/transaction?loginAgent=' . $login_agent.'&passwordAgent=' . $password_agent;
+        //var_dump($url);
+
+/*             $body = array(
+            'idFromClient'   =>$order_id,
             'additionnalInfos' => array(
 
             ),
-            'amount'         =>$this->$total,
-            'callback'       =>$this->$callback_url,
-            'recipientNumber'=>$this->$phone,
-            'serviceCode'    =>$this->$service_code
+            'amount'         =>$total,
+            'callback'       =>$this->callback_url,
+            'recipientNumber'=>$phone,
+            'serviceCode'    =>$service_code
         ); */
 
         $body = array(
@@ -425,7 +425,7 @@ class WC_Gateway_Touch extends WC_Payment_Gateway
                 'recipientLastName' => 'ndiaye',
                 'destinataire' => '620631099'
             ),
-            'amount'         =>$this->$total,
+            'amount'         =>$total,
             'callback'       =>'https://myshippingpack.azurewebsites.net/API/WebServicePayments.asmx/callbackInTouch',
             'recipientNumber'=>'620631099',
             'serviceCode'    =>'GN_PAIEMENTMARCHAND_OM_TP'
@@ -434,12 +434,13 @@ class WC_Gateway_Touch extends WC_Payment_Gateway
         $args = array(
             'body'    => $body,
             'method'  => 'PUT',
-            'timeout' => 45
+            'timeout' => 5
         );
 
         $response = wp_remote_request($url, $args);
 
-
+		var_dump($response);
+		return;
 
         if (is_wp_error($response)) {
             $error_message = $response->get_error_message();
