@@ -39,5 +39,5 @@ function touch_add_bulk_invoice_order_status() {
     }
 }
 
-add_action( 'admin_footer', 'touch_add_bulk_invoice_order_status' );
+add_action('admin_footer', 'touch_add_bulk_invoice_order_status');
 
